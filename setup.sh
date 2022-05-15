@@ -2,8 +2,26 @@
 
 DEFAULT_IP="192.168.1.160"
 DEFAULT_NETMASK="255.255.255.0"
+DEFAULT_PREFIX="24"
 DEFAULT_GW="192.168.1.1"
 DEFAULT_DNS="192.168.1.1"
+
+function getIp(){
+	cur_ip=$(ip a | grep inet | head -n3 | tail -n1 | cut -d ' ' -f6 | cut -d '/' -f1)
+	if [ $cur_ip != "" ]; then
+		echo $cur_ip
+	else
+		echo $DEFAULT_IP	# if no ip is found
+	fi
+}
+function getNetmasks(){
+	cur_net=$(ip a | grep inet | head -n3 | tail -n1 | cut -d ' ' -f6 | cut -d '/' -f2)
+	if [ $cur_net != "" ]; then
+		echo $cur_net
+	else
+		echo $DEFAULT_PREFIX	# if no netmask is found
+	fi
+}
 
 function Help(){
 
@@ -38,7 +56,7 @@ function Help(){
 
 }
 
-interface=$(ifconfig | head -n1 | cut -d ' ' -f 1 | sed s/://)
+interface=$(ip a | head -n7 | tail -n -1 | cut -d ':' -f 2 | cut -d ' ' -f 2)
 
 # if we can modify those values
 DNS=false
@@ -98,7 +116,7 @@ while [ "$1" != "" ]; do
 			DNS=true
 		fi
 		if [ $INTERFACE == false ]; then
-			interface=$(ifconfig | head -n1 | cut -d ' ' -f 1 | sed s/://)
+			interface=$(ip a | head -n7 | tail -n -1 | cut -d ':' -f 2 | cut -d ' ' -f 2)
 			INTERFACE=true
 		fi
 		;;
@@ -135,11 +153,13 @@ echo "On interface ${interface}:"
 
 if [ $IP == true ]; then
 	sudo ifconfig $interface $ip up
+	# sudo ip addr add ${ip}/$(getNetmask) dev ${interface}
 	echo "ip:	 ${ip}"
 fi
 
 if [ $NETMASK == true ]; then
 	sudo ifconfig $interface netmask $subnet up
+	# sudo ip addr add $(getIp)/$subnet	#* here convert (for example) 255.255.255.0 to /24
 	echo "netmask: ${subnet}"
 fi
 
