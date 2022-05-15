@@ -1,6 +1,5 @@
 # <center>neth0</center>
 ### This script helps you to manage your network configurations
-
 # Options
     -a, -ip                 Change the IP address
 	-n, -netmask            Change the netmask
@@ -25,9 +24,9 @@
 ./setup.sh -ip 175.15.8.12 -netmask 255.255.255.0
 ```
 
-#### Change the ip to `192.168.5.22` and dns to `192.168.6.200`
+#### Change the gateway to `192.168.5.1` and dns to `192.168.6.200`
 ```bash
-./setup.sh -ip 192.168.5.22 -dns 192.168.6.200
+./setup.sh -gw 192.168.5.1 -dns 192.168.6.200
 ```
 
 #### Change the configuration to default values without modifying the current ip and set the dns to `192.168.1.200`
@@ -45,3 +44,22 @@
 ```bash
 ./setup.sh --no-ip -a <ip> # ip changed to <ip>
 ```
+<br>
+
+# Additional info
+In order to be executed this program needs the `ifconfig` command
+## Ubuntu
+```bash
+sudo apt install net-tools
+```
+## Arch
+```bash
+sudo pacman -S net-tools
+```
+<br>
+
+# Contribution
+You can contribute in any way. One of the things i'd like to implement are
+- [ ] get rid of the `ifconfig` command and only use `ip` one
+- [ ] Allow user to set netmask and ip separately even with `ip` command
+- [ ] Allow user to set the netmask as prefix length or as `x.x.x.x` 
