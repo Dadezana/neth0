@@ -81,7 +81,7 @@ function Help(){
 
 }
 
-interface=$(ip a | head -n7 | tail -n -1 | cut -d ':' -f 2 | cut -d ' ' -f 2)
+interface=$(ip -br addr show | head -2 | tail -1 | cut -d ' ' -f1)
 
 # if we can modify those values
 DNS=false
@@ -141,7 +141,7 @@ while [ "$1" != "" ]; do
 			DNS=true
 		fi
 		if [ $INTERFACE == false ]; then
-			interface=$(ip a | head -n7 | tail -n -1 | cut -d ':' -f 2 | cut -d ' ' -f 2)
+			interface=$(ip -br addr show | head -2 | tail -1 | cut -d ' ' -f1)
 			INTERFACE=true
 		fi
 		;;
@@ -183,24 +183,20 @@ if [ $IP == true ]; then
 # check if this is a valid ip address
 	temp=$(echo $old_ip | tr -cd '.' | wc -c)	
 	if [ $temp -gt 0 ]; then
-		sudo ip addr del $old_ip dev ${interface}
-		# echo "Deleted ${old_ip}"
+		sudo ip addr del ${old_ip} dev ${interface}
 	fi
 	
-	# echo "ip changed with netmask $net"
 	sudo ip addr add ${ip}/${net} dev ${interface}
 	echo "ip:	 ${ip}"
 fi
 
 if [ $NETMASK == true ]; then
-	# sudo ifconfig $interface netmask $subnet up
 	ip=$(getIp)
 	old_ip="$(getIp)/$(getNetmask)"
 	
 	temp=$(echo $old_ip | tr -cd '.' | wc -c)
 	if [ $temp -gt 0 ]; then
-		sudo ip addr del $old_ip dev ${interface}
-		echo "Deleted ${old_ip}"
+		sudo ip addr del ${old_ip} dev ${interface}
 	fi
 	
 	net=$(toPrefix $subnet)
