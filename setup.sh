@@ -14,12 +14,37 @@ function getIp(){
 		echo $DEFAULT_IP	# if no ip is found
 	fi
 }
-function getNetmasks(){
+function getNetmask(){
 	cur_net=$(ip a | grep inet | head -n3 | tail -n1 | cut -d ' ' -f6 | cut -d '/' -f2)
-	if [ $cur_net != "" ]; then
+	if [ $cur_net -gt 30 ]; then
+		echo $DEFAULT_PREFIX
+	elif [ $cur_net != "" ]; then
 		echo $cur_net
 	else
 		echo $DEFAULT_PREFIX	# if no netmask is found
+	fi
+}
+
+function decToBin(){
+	echo "obase=2;${1}" | bc
+}
+
+function toPrefix(){	# contains(netmask)
+	passed_net=$(echo $1 | tr -cd '.' | wc -c)
+	if [ $passed_net -gt 0 ]; then
+		num=$(echo $1 | cut -d '.' -f1)
+		bit1=$(decToBin $num)
+		num=$(echo $1 | cut -d '.' -f2)
+		bit2=$(decToBin $num)
+		num=$(echo $1 | cut -d '.' -f3)
+		bit3=$(decToBin $num)
+		num=$(echo $1 | cut -d '.' -f4)
+		bit4=$(decToBin $num)
+		bits=$bit1$bit2$bit3$bit4
+		bits=$(echo $bits | tr -cd '1' | wc -c)
+		echo $bits
+	else
+		echo $1
 	fi
 }
 
@@ -152,14 +177,35 @@ done
 echo "On interface ${interface}:"
 
 if [ $IP == true ]; then
-	sudo ifconfig $interface $ip up
-	# sudo ip addr add ${ip}/$(getNetmask) dev ${interface}
+	old_ip="$(getIp)/$(getNetmask)"
+	net=$(getNetmask)
+	
+# check if this is a valid ip address
+	temp=$(echo $old_ip | tr -cd '.' | wc -c)	
+	if [ $temp -gt 0 ]; then
+		sudo ip addr del $old_ip dev ${interface}
+		# echo "Deleted ${old_ip}"
+	fi
+	
+	# echo "ip changed with netmask $net"
+	sudo ip addr add ${ip}/${net} dev ${interface}
 	echo "ip:	 ${ip}"
 fi
 
 if [ $NETMASK == true ]; then
-	sudo ifconfig $interface netmask $subnet up
-	# sudo ip addr add $(getIp)/$subnet	#* here convert (for example) 255.255.255.0 to /24
+	# sudo ifconfig $interface netmask $subnet up
+	ip=$(getIp)
+	old_ip="$(getIp)/$(getNetmask)"
+	
+	temp=$(echo $old_ip | tr -cd '.' | wc -c)
+	if [ $temp -gt 0 ]; then
+		sudo ip addr del $old_ip dev ${interface}
+		echo "Deleted ${old_ip}"
+	fi
+	
+	net=$(toPrefix $subnet)
+	sudo ip addr add ${ip}/${net} dev ${interface}
+
 	echo "netmask: ${subnet}"
 fi
 
@@ -177,5 +223,4 @@ if [ $DNS == true ]; then
 		echo "dns:	 ${dns}"
 	fi
 fi
-
 
