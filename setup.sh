@@ -177,6 +177,10 @@ done
 echo "On interface ${interface}:"
 
 if [ $IP == true ]; then
+
+	def_gw=$(ip route show | grep default | cut -d ' ' -f3)
+	temp_gw=$(echo ${def_gw} | cut -d ' ' -f3 | tr -cd '.' | wc -c)
+	
 	old_ip="$(getIp)/$(getNetmask)"
 	net=$(getNetmask)
 	
@@ -187,6 +191,17 @@ if [ $IP == true ]; then
 	fi
 	
 	sudo ip addr add ${ip}/${net} dev ${interface}
+
+# check if a gateway exists
+	
+	echo "temp: $temp"
+	
+	echo "gw found: ${def_gw}"
+	if [ $temp_gw -gt 0 ]; then #&& [ $GATEWAY == false ]; then
+	
+		sudo ip route add ${def_gw} dev ${interface}
+		sudo ip route add default via ${def_gw}
+	fi
 	echo "ip:	 ${ip}"
 fi
 
