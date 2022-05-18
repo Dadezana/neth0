@@ -22,6 +22,8 @@
 #### Change the ip to `175.15.8.12` and subnet `255.255.255.0`
 ```bash
 ./setup.sh -ip 175.15.8.12 -netmask 255.255.255.0
+# or
+./setup.sh -ip 175.15.8.12 -netmask 24
 ```
 
 #### Change the gateway to `192.168.5.1` and dns to `192.168.6.200`
@@ -46,20 +48,9 @@
 ```
 <br>
 
-# Additional info
-In order to be executed this program needs the `ifconfig` command
-## Ubuntu
-```bash
-sudo apt install net-tools
-```
-## Arch
-```bash
-sudo pacman -S net-tools
-```
-<br>
-
 # Contribution
 You can contribute in any way. One of the things i'd like to implement are
-- [ ] get rid of the `ifconfig` command and only use `ip` one
-- [ ] Allow user to set netmask and ip separately even with `ip` command
-- [ ] Allow user to set the netmask as prefix length or as `x.x.x.x` 
+- [X] get rid of the `ifconfig` command and only use `ip` one
+- [X] Allow user to set netmask and ip separately even with `ip` command
+- [X] Allow user to set the netmask as prefix length or as `x.x.x.x` 
+- [ ] Avoid displaying error message when, for example, no argument are passed to `tr` in `count()` function. Use customs one instead
