@@ -25,12 +25,20 @@ function getNetmask(){
 	fi
 }
 
+function count(){ # count(charToCount, string)
+	char=$2
+	str=$1
+	
+	num=$(echo ${str} | tr -cd '${char}' | wc -c)
+	echo ${num}
+}
+
 function decToBin(){
 	echo "obase=2;${1}" | bc
 }
 
 function toPrefix(){	# contains(netmask)
-	passed_net=$(echo $1 | tr -cd '.' | wc -c)
+	passed_net=$(count $1 '.')
 	if [ $passed_net -gt 0 ]; then
 		num=$(echo $1 | cut -d '.' -f1)
 		bit1=$(decToBin $num)
@@ -47,6 +55,7 @@ function toPrefix(){	# contains(netmask)
 		echo $1
 	fi
 }
+
 
 function Help(){
 
@@ -179,13 +188,13 @@ echo "On interface ${interface}:"
 if [ $IP == true ]; then
 
 	def_gw=$(ip route show | grep default | cut -d ' ' -f3)
-	temp_gw=$(echo ${def_gw} | cut -d ' ' -f3 | tr -cd '.' | wc -c)
+	temp_gw=$(count $def_gw '.')
 	
 	old_ip="$(getIp)/$(getNetmask)"
 	net=$(getNetmask)
 	
 # check if this is a valid ip address
-	temp=$(echo $old_ip | tr -cd '.' | wc -c)	
+	temp=$(count $old_ip '.')	
 	if [ $temp -gt 0 ]; then
 		sudo ip addr del ${old_ip} dev ${interface}
 	fi
@@ -193,9 +202,7 @@ if [ $IP == true ]; then
 	sudo ip addr add ${ip}/${net} dev ${interface}
 
 # check if a gateway exists
-	
-	echo "temp: $temp"
-	
+	echo "temp: $temp_gw"
 	echo "gw found: ${def_gw}"
 	if [ $temp_gw -gt 0 ]; then #&& [ $GATEWAY == false ]; then
 	
@@ -209,7 +216,7 @@ if [ $NETMASK == true ]; then
 	ip=$(getIp)
 	old_ip="$(getIp)/$(getNetmask)"
 	
-	temp=$(echo $old_ip | tr -cd '.' | wc -c)
+	temp=$(count $old_ip '.')
 	if [ $temp -gt 0 ]; then
 		sudo ip addr del ${old_ip} dev ${interface}
 	fi
