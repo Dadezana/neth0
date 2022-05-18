@@ -25,11 +25,11 @@ function getNetmask(){
 	fi
 }
 
-function count(){ # count(charToCount, string)
+function count(){ # count(string, charToCount)
 	char=$2
 	str=$1
 	
-	num=$(echo ${str} | tr -cd '${char}' | wc -c)
+	num=$(echo ${str} | tr -cd ${char} | wc -c)
 	echo ${num}
 }
 
@@ -37,7 +37,7 @@ function decToBin(){
 	echo "obase=2;${1}" | bc
 }
 
-function toPrefix(){	# contains(netmask)
+function toPrefix(){	# convert x.x.x.x to prefix length
 	passed_net=$(count $1 '.')
 	if [ $passed_net -gt 0 ]; then
 		num=$(echo $1 | cut -d '.' -f1)
@@ -202,8 +202,6 @@ if [ $IP == true ]; then
 	sudo ip addr add ${ip}/${net} dev ${interface}
 
 # check if a gateway exists
-	echo "temp: $temp_gw"
-	echo "gw found: ${def_gw}"
 	if [ $temp_gw -gt 0 ]; then #&& [ $GATEWAY == false ]; then
 	
 		sudo ip route add ${def_gw} dev ${interface}
